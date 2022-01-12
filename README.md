@@ -1,5 +1,6 @@
 # quest_of_lab_graal
-Spider chivalries that will travel your desired website and search for keywords you are looking for
+Spider chivalries that will travel your desired website and search for keywords you are looking for.
+The final result is a csv file located in the output/ folder which will pair visited urls with a score representing the pertinence of the page for the words of interest.
 
 # How to install it
 

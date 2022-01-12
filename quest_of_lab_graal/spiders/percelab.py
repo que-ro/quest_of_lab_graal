@@ -9,32 +9,15 @@ class PercelabSpider(scrapy.Spider):
     name = 'percelab'
     
     # Websites to scan
-    allowed_domains = ['usias.fr']
-    start_urls = ['https://www.usias.fr/fellows/fellows-2021/']
+    allowed_domains = ['toscrape.com']
+    start_urls = ['https://quotes.toscrape.com/']
     
     # Words to search for with corresponding weights
     words_to_search = {
-        'transcriptomique' : 1,
-        'transciptomic' : 1,
-        'single cell' : 1,
-        'cellule unique' : 1,
-        'cellules uniques' : 1,
-        'cellule individuelle' : 1,
-        'cellules individulles' : 1,
-        'single cell RNA' : 1,
-        'scRNA' : 1,
-        'cancer' : 1,
-        'glioblastom' : 1,
-        'machine learning' : 1,
-        'apprentissage automatisé' : 1,
-        'intelligence artificielle' : 1,
-        'tSNE' : 1,
-        'cNMF' : 1,
-        'bioinformatique' : 1,
-        'bio-informatique' : 1,
-        'bioinformatic' : 1,
-        'aptamère' : 1,
-        'aptamer' : 1
+        'aWord' : 1,
+		'anotherWord' : 1,
+        'aMoreImportantWord' : 5,
+        'theMostImportantWord' : 10
     }
     
     # List of file formats used for url filtering
