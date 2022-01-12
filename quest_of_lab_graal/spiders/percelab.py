@@ -9,19 +9,34 @@ class PercelabSpider(scrapy.Spider):
     name = 'percelab'
     
     # Websites to scan
-    allowed_domains = ['toscrape.com']
-    start_urls = ['https://quotes.toscrape.com/']
+    allowed_domains = ['ibmc.cnrs.fr']
+    start_urls = ['https://ibmc.cnrs.fr/laboratoire/']
     
     # Words to search for with corresponding weights
     words_to_search = {
-        'aWord' : 1,
-		'anotherWord' : 1,
-        'aMoreImportantWord' : 5,
-        'theMostImportantWord' : 10
+        'transcriptomique' : 1,
+        'transciptomic' : 1,
+        'single cell' : 1,
+        'cellule unique' : 1,
+        'cellule individuelle' : 1,
+        'single cell RNA' : 1,
+        'scRNA' : 1,
+        'cancer' : 1,
+        'glioblastom' : 1,
+        'machine learning' : 1,
+        'apprentissage automatisé' : 1,
+        'intelligence artificielle' : 1,
+        'tSNE' : 1,
+        'cNMF' : 1,
+        'bioinformatique' : 1,
+        'bio-informatique' : 1,
+        'bioinformatic' : 1,
+        'aptamère' : 1,
+        'aptamer' : 1
     }
     
-    # List of file formats used for url filtering
-    file_formats = [
+    # List of words url shouldn't contain
+    filter_url_containing = [
         '.png',
         '.jpg',
         '.jpeg',
@@ -38,7 +53,8 @@ class PercelabSpider(scrapy.Spider):
         '.txt',
         '.doc',
         '.ppt',
-        '.pptx'
+        '.pptx',
+        'publication',
     ]
     
     
@@ -66,10 +82,10 @@ class PercelabSpider(scrapy.Spider):
         list_filtered_formated_links = self.get_filtered_and_formated_links(response.request.url, list_links)
          
         # Calculate score of the page
-        page_score = self.get_scan_score(response)
+        page_score, list_words_found = self.get_scan_score_and_words_found(response)
         
         # Add page to csv file
-        self.write_score_to_csv(page_score, response.request.url)
+        self.write_to_csv(page_score, response.request.url, list_words_found)
         
         # Crawl to next page        
         for url in list_filtered_formated_links:
@@ -104,7 +120,7 @@ class PercelabSpider(scrapy.Spider):
                 pass
                 
             # Filter url to pictures
-            elif(any(pic_format in link for pic_format in PercelabSpider.file_formats)):
+            elif(any(pic_format in link for pic_format in PercelabSpider.filter_url_containing)):
                 pass
             
             # Case absolute url
@@ -128,7 +144,7 @@ class PercelabSpider(scrapy.Spider):
         
         
     # Get score of the page
-    def get_scan_score(self, response):
+    def get_scan_score_and_words_found(self, response):
     
         # Score of the page
         score = 0
@@ -138,6 +154,9 @@ class PercelabSpider(scrapy.Spider):
         
         # All words in lowercase
         page_text_content = page_text_content.lower()
+        
+        # List of found words 
+        list_words_founded = []
         
         # Loop on the pair of wanted words and their weights
         for word, weight in PercelabSpider.words_to_search.items():
@@ -151,12 +170,19 @@ class PercelabSpider(scrapy.Spider):
             # Add to score
             score = score + ( nb_occ_word * weight )
             
+            # Add to list of founded words if not yet inserted
+            if(nb_occ_word > 0 and word_lowercase not in list_words_founded):
+                list_words_founded.append(word_lowercase)
+                
+        # Multiply score with number of unique words found (Combo)
+        score = score * len(list_words_founded)
+            
         # Return score
-        return score
+        return score, list_words_founded
         
         
-    # Write score to csv file
-    def write_score_to_csv(self, score, url):
+    # Write new line to csv file
+    def write_to_csv(self, score, url, list_words_found):
         
         # Name of the file
         filename = 'output/list_url_scores_' + self.get_words_dict_hash() + '.csv'
@@ -167,8 +193,11 @@ class PercelabSpider(scrapy.Spider):
         # Open file
         with open(filename, 'a+') as file:
         
+            # Concatenated string of found words
+            concatenated_found_words = ' '.join(list_words_found)
+        
             # Append line
-            file.write(url + ';' + str(score) + '\n')
+            file.write(url + ';' + str(score) + ';' + concatenated_found_words + '\n')
         
         
     # Get Hash from dictionnary of words of interest
