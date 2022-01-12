@@ -56,6 +56,12 @@ The parameter is set at 2s by default.
 If you use the handle dynamic loading page feature and you want the bot in action you can do it:
 Go to the webutilities.py and comment "chrome_options.add_argument("--headless")" by adding a #.
 
+- Add filter words to not crawl certain url:
+Go in percelab.py and add words in the list filter_url_containing.
+
+- Want your own scoring? 
+Change the method get_scan_score_and_words_found(..) in percelab.py. At the moment the score sum the weight of each word found and then multiply the score by the number of unique word scanned.
+
 # Common errors 
 Code errors   Description
 0001          The chromedriver doesn't support the chrome version you have installed on your computer. Check the chrome version you have and find the adequate webdriver on
