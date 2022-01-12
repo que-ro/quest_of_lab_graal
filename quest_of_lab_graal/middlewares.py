@@ -5,9 +5,11 @@
 
 from scrapy import signals
 
+import sys
+from webutilities.webutilities import WebUtilities
+
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
-
 
 class QuestOfLabGraalSpiderMiddleware:
     # Not all methods need to be defined. If a method is not defined,
@@ -87,7 +89,22 @@ class QuestOfLabGraalDownloaderMiddleware:
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
+        
+        # robots.txt are not processed as dynamic page
+        if('robots.txt' in request.url):
+            return response
+        
+        # Case if dynamic loading page are handled
+        if(spider.handle_dynamic_loading):
+            
+            # Open driver
+            driver = WebUtilities.get_chrome_driver()
+            
+            # Return the response
+            return WebUtilities.get_driver_html_response(driver, request)
+            
         return response
+        
 
     def process_exception(self, request, exception, spider):
         # Called when a download handler or a process_request()
