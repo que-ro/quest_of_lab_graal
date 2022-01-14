@@ -41,6 +41,7 @@ words_to_search = {
 You can add options: 
 handle_dynamic_loading=yes or handle_dynamic_loading=y: Will allow the scan of web dynamic loading page, such as page containing list that load when you scroll to the bottom of it.
 url_needs_to_contain=thisChainOfCharacters: Will force the spider to only crawl urls containing the chain of characters.
+http_allowed=y or http_allowed=yes: The spider will also crawl http url in addition to the default https
 
 Command line example: scrapy crawl percelab - a handle_dynamic_loading=yes -a url_needs_to_contain=thisChainOfCharacters
 
@@ -53,7 +54,7 @@ Each loading has a waiting time. This waiting time can be customized in the webu
 The parameter is set at 2s by default.
 
 - Visualize the process:
-If you use the handle dynamic loading page feature and you want the bot in action you can do it:
+If you use the handle dynamic loading page feature and you want to see the bot in action you can do it:
 Go to the webutilities.py and comment "chrome_options.add_argument("--headless")" by adding a #.
 
 - Add filter words to not crawl certain url:

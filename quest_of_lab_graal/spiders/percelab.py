@@ -9,8 +9,8 @@ class PercelabSpider(scrapy.Spider):
     name = 'percelab'
     
     # Websites to scan
-    allowed_domains = ['ibmc.cnrs.fr']
-    start_urls = ['https://ibmc.cnrs.fr/laboratoire/']
+    allowed_domains = ['bsc.unistra.fr']
+    start_urls = ['http://bsc.unistra.fr/presentation/presentation-de-lunite/']
     
     # Words to search for with corresponding weights
     words_to_search = {
@@ -54,12 +54,20 @@ class PercelabSpider(scrapy.Spider):
         '.doc',
         '.ppt',
         '.pptx',
-        'publication',
+        'tel',
+        '%',
+        '#',
+        'javascript',
+        'mailto'
     ]
     
     
     # Constructor of the spider
-    def __init__(self, handle_dynamic_loading = 'f', url_needs_to_contain = '', *args,**kwargs):
+    def __init__(self, 
+        handle_dynamic_loading = 'n', 
+        url_needs_to_contain = '',
+        http_allowed = 'n',
+        *args,**kwargs):
     
         # Invoke parent constructor
         super(PercelabSpider, self).__init__(*args, **kwargs)
@@ -72,13 +80,16 @@ class PercelabSpider(scrapy.Spider):
         
         # Init boolean checking if there is a url filter
         self.has_url_filter = (self.url_needs_to_contain != '')
+        
+        # Init boolean determining if crawling of http is allowed
+        self.http_allowed = (http_allowed == 'y' or http_allowed == 'yes')
 
     
     # Method called to process each request
     def parse(self, response):
         
         # Get new links to visit
-        list_links = response.xpath('/html/body//a/@href').extract();
+        list_links = response.xpath('/html/body//a/@href').extract(); 
         list_filtered_formated_links = self.get_filtered_and_formated_links(response.request.url, list_links)
          
         # Calculate score of the page
@@ -100,7 +111,10 @@ class PercelabSpider(scrapy.Spider):
         list_filtered_formated_links = []
         
         # Url prefix regex pattern
-        urlprefix_regex_pattern = 'https\:\/\/.*?\/'
+        if(self.http_allowed):
+            urlprefix_regex_pattern = '(http|https)\:\/\/.*?\/'
+        else:
+            urlprefix_regex_pattern = 'https\:\/\/.*?\/'
         
         # Search of the pattern in the base url
         urlprefix_match = re.search(urlprefix_regex_pattern, base_url, re.IGNORECASE)
@@ -131,9 +145,9 @@ class PercelabSpider(scrapy.Spider):
             elif(link.startswith('/')):
                 list_filtered_formated_links.append(url_prefix[:-1] + link)
                 
-            # Case other https
-            elif(link.startswith('http')):
-                pass
+            # # Case other https
+            # elif(link.startswith('http')):
+                # pass
                 
             # Case other relative urls
             else:
@@ -200,15 +214,21 @@ class PercelabSpider(scrapy.Spider):
             file.write(url + ';' + str(score) + ';' + concatenated_found_words + '\n')
         
         
-    # Get Hash from dictionnary of words of interest
+    # Get Hash from dictionnary of words of interest and sites of interest
     def get_words_dict_hash(self):
     
         # Variable containing all the dict in one string
         joined_dict = ''
     
-        # Loop on the dictionnary
+        # Loop on the dictionnary of words of interest
         for word, weight in PercelabSpider.words_to_search.items():
             joined_dict = joined_dict + word + str(weight)
+            
+        for sites in PercelabSpider.start_urls:
+            joined_dict = joined_dict + sites
+            
+        for allowed_domain in PercelabSpider.allowed_domains:
+            joined_dict = joined_dict + allowed_domain
         
         # Encode unicode character
         joined_dict = joined_dict.encode('utf-8')
