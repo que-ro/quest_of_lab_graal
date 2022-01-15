@@ -9,8 +9,8 @@ class PercelabSpider(scrapy.Spider):
     name = 'percelab'
     
     # Websites to scan
-    allowed_domains = ['bsc.unistra.fr']
-    start_urls = ['http://bsc.unistra.fr/presentation/presentation-de-lunite/']
+    allowed_domains = ['www.igbmc.fr']
+    start_urls = ['https://www.igbmc.fr/']
     
     # Words to search for with corresponding weights
     words_to_search = {
@@ -58,7 +58,9 @@ class PercelabSpider(scrapy.Spider):
         '%',
         '#',
         'javascript',
-        'mailto'
+        'mailto',
+        '?',
+        'doi'
     ]
     
     
@@ -140,14 +142,14 @@ class PercelabSpider(scrapy.Spider):
             # Case absolute url
             elif(link.startswith(url_prefix)):
                 list_filtered_formated_links.append(link)
+                
+            # Case absolute url from other web domain
+            elif(link.startswith('http')):
+                pass
             
             # Case relative url starting with /
             elif(link.startswith('/')):
                 list_filtered_formated_links.append(url_prefix[:-1] + link)
-                
-            # # Case other https
-            # elif(link.startswith('http')):
-                # pass
                 
             # Case other relative urls
             else:
